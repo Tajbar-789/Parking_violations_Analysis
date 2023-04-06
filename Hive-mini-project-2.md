@@ -15,100 +15,59 @@ load data from local to hdfs loaction
 
 hdfs dfs -put /config/workspace/Parking_Violations_Issued_-_Fiscal_Year_2017.csv /data/
 
+```
+
 create table parking_violations_issued
 (
       Summons_Number bigint,
-   
       Plate_ID string,
-      
       Registration_State string,
-      
       Plate_Type string,
-      
       Issue_Date string,
-      
       Violation_Code int,
-      
       Vehicle_Body_Type string,
-      
       Vehicle_Make string,
-      
       Issuing_Agency string,
-      
       Street_Code1 int,
-      
       Street_Code2 int,
-      
       Street_Code3 int,
-      
       Vehicle_Expiration Date,
-      
       Violation_Location int,
-      
       Violation_Precinct int,
-      
       Issuer_Precinct int,
-      
       Issuer_Code int,
-      
       Issuer_Command string,
-      
       Issuer_Squad string,
-      
       Violation_Time string,
-      
       Time_First_Observed string,
-      
       Violation_County string,
-      
       Violation_In_Front_Of_Or_Opposite string,
-      
       House_Number string,
-      
       Street_Name string,
-      
       Intersecting_Street string,
-      
       Date_First_Observed int,
-      
       Law_Section int,
-      
       Sub_Division string,
-      
       Violation_Legal_Code string,
-      
       Days_Parking_In_Effect string,
-      
       From_Hours_In_Effect string,
-      
       To_Hours_In_Effect string,
-      
       Vehicle_Color string,
-      
       Unregistered_Vehicle int,
-      
       Vehicle_Year string,
-      
       Meter_Number string,
-      
       Feet_From_Curb int,
-      
       Violation_Post_Code string,
-      
       Violation_Description string,
-      
       No_Standing_or_Stopping_Violation string,
-      
       Hydrant_Violation string,
-      
       Double_Parking_Violation string
 )
-
 row format delimited
-
 fields terminated by ','
-
 tblproperties ("skip.header.line.count" = "1");
+
+```
 
 
 loading into the table 
@@ -168,7 +127,6 @@ row format delimited
 fields terminated by ',';
 
 
-```
 
 set hive.exec.dynamic.partition=true;
 set hive.exec.dynamic.partition.mode=nonstrict; 
@@ -219,7 +177,7 @@ insert into table parking_violations_issued_2017 partition (Registration_State )
 	            Registration_State
 from parking_violations_issued where year(from_unixtime(unix_timestamp(issue_date,'MM/dd/yyyy'),'yyyy-MM-dd'))=2017;
 
-
+```
  
 Part-I: Examine the data
 
@@ -255,16 +213,20 @@ select vehicle_make,count(1) as total_number_of_violations from parking_violatio
 
 a.) Violating Precincts (this is the precinct of the zone where the violation occurred)
 
+```
 select Violation_Precinct,count(1) as total_number_of_violations from parking_violations_issued_2017 group       by Violation_Precinct order by total_number_of_violations desc limit 5;
-    
+```    
 b.) Issuer Precincts (this is the precinct that issued the ticket)
 
+```
 select Issuer_Precinct,count(1) as total_number_of_violations from parking_violations_issued_2017 group by Issuer_Precinct order by total_number_of_violations desc limit 5;
 
+```
 
 
 4.) Find the violation code frequency across 3 precincts which have issued the most number of tickets - do these precinct zones have an exceptionally high frequency of certain violation codes?
 
+```
 create table top_3_violation_precinct as select violation_precinct,count(1) as sum from parking_violations_issued_2017 group by Violation_Precinct order by sum desc limit 3;
 
 
@@ -272,7 +234,7 @@ SET hive.auto.convert.join=true;
 
 select table1.Violation_Precinct as violation_precinct,table1.violation_code as violation_code,count(*) as total_violations from parking_violations_issued_2017 table1 inner join top_3_violation_precinct  table2 on table1.violation_precinct=table2.violation_precinct group by table1.violation_precinct,table1.violation_code order by total_violations desc; 
 
-
+```
 
 5.) Find out the properties of parking violations across different times of the day: The Violation Time field is specified in a strange format. Find a way to make this into a time attribute that you can use to divide into groups.
 
@@ -280,10 +242,13 @@ Their are two ways to do this
 
 1- To Convert violation_time string to unix epoch counter bigint as follows 
 
+```
 select violation_time,case when substr(violation_time,5,1)='P' then unix_timestamp(substr(violation_time,0,4),'HHmm')+12*60*60 else unix_timestamp(substr(violation_time,0,4),'HHmm') END as new_time ,from_unixtime(case when substr(violation_time,5,1)='P' then unix_timestamp(substr(violation_time,0,4),'HHmm')+12*60*60 else unix_timestamp(substr(violation_time,0,4),'HHmm') END,'HH:mm:ss') from parking_violations_issued_2017 ;
 
+```
 2- To divide the 24 hours format into different bins of certain range as follows 
 
+```
 select case when substr(violation_time,5,1)='P' then unix_timestamp(substr(violation_time,0,4),'HHmm')+12*60*60 else unix_timestamp(substr(violation_time,0,4),'HHmm') END ,
 case when substring(Violation_Time,1,2) in ('00','01','02','03','12') and upper(substring(Violation_Time,-1))='A' then 1 
 when substring(Violation_Time,1,2) in ('04','05','06','07') and upper(substring(Violation_Time,-1))='A' then 2 
@@ -293,13 +258,14 @@ when substring(Violation_Time,1,2) in ('04','05','06','07') and upper(substring(
 when substring(Violation_Time,1,2) in ('08','09','10','11') and upper(substring(Violation_Time,-1))='P'then 6 
 END as violation_time_bin from parking_violations_issued_2017 ;
 
-
+```
 
 
 
 6.) Divide 24 hours into 6 equal discrete bins of time. The intervals you choose are at your discretion. For each of these groups, find the 3 most commonly occurring violations
 
 ---creating a new table with 2 extra columns violation_time_bin and season 
+```
 
 create table parking_violations_issued_bucket_table
 (
@@ -413,20 +379,24 @@ when month(from_unixtime(unix_timestamp(issue_date,'MM/dd/yyyy'),'yyyy-MM-dd')) 
 else 'unknown' end  from parking_violations_issued_2017 ;
 
 
+```
+
 
 ---for each group the top three violations code   are as follows 
 
+```
 create table top_violations_per_bin as select * ,DENSE_RANK () OVER (partition by violation_time_bin order by total_violations desc) as rank  from (select violation_time_bin,violation_code,count(*) as total_violations from parking_violations_issued_bucket_table group by violation_time_bin,violation_code) as n  ; 
 
 
 select violation_time_bin,violation_code,total_violations from top_violations_per_bin where rank<=3 and violation_time_bin is not null;
 
-
+```
 
 
 7.) Now, try another direction. For the 3 most commonly occurring violation codes, find the most common times of day (in terms of the bins from the previous part)
 
 
+```
 create table top_3_violation_code as select violation_code,count(1) as total_violations from parking_violations_issued_bucket_table group by violation_code order by total_violations desc limit 3;
 
 
@@ -436,7 +406,7 @@ create table most_commont_time_for_top_3_violation_code as select *,RANK() OVER(
 select violation_code,violation_time_bin,total_violations from most_commont_time_for_top_3_violation_code where x=1;
 
 
-
+```
 
 8.) Let’s try and find some seasonality in this data
 
@@ -448,11 +418,13 @@ select season,count(1) from parking_violations_issued_bucket_table group by seas
 
  b.)Then, find the 3 most common violations for each of these seasons.
 
+```
 
 create table top_violations_code_per_season as select * ,DENSE_RANK () OVER (partition by season order by total_violations desc) as rank  from (select season,violation_code,count(*) as total_violations from parking_violations_issued_bucket_table group by violation_time_bin,violation_code) as n  ; 
 
 
 select season,violation_code,total_violations from top_violations_code_per_season where rank<=3;
 
+```
 
 Note: Please ensure you make necessary optimizations to your queries like selecting the appropriate table format, using partitioned/bucketed tables. Marks will be awarded for keeping the performance also in mind.
