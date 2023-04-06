@@ -10,12 +10,12 @@ Note: Consider only the year 2017 for analysis and not the Fiscal year.
 
 The analysis can be divided into two parts:
 
-
+```
 load data from local to hdfs loaction 
 
 hdfs dfs -put /config/workspace/Parking_Violations_Issued_-_Fiscal_Year_2017.csv /data/
 
-```
+
 
 create table parking_violations_issued
 (
@@ -72,10 +72,11 @@ tblproperties ("skip.header.line.count" = "1");
 
 loading into the table 
 
+```
 load data  inpath '/data/Parking_Violations_Issued_-_Fiscal_Year_2017.csv' into table parking_violations_issued;
 
 
-```
+
 create table parking_violations_issued_2017
 (
       Summons_Number bigint,
@@ -183,32 +184,38 @@ Part-I: Examine the data
 
 1.) Find the total number of tickets for the year.
 
+```
 select year(from_unixtime(unix_timestamp(issue_date,'MM/dd/yyyy'),'yyyy-MM-dd')) as issued_year,count(1) as total_tickets_issued from parking_violations_issued_2017 group by year(from_unixtime(unix_timestamp(issue_date,'MM/dd/yyyy'),'yyyy-MM-dd'));
+```
 
 2.) Find out how many unique states the cars which got parking tickets came from.
 
+```
 select Registration_state,count(1) as total_count from parking_violations_issued_2017 group by Registration_state;
-
+```
 3.) Some parking tickets don’t have addresses on them, which is cause for concern. Find out how many such tickets there are(i.e. tickets where either "Street Code 1" or "Street Code 2" or "Street Code 3" is empty )
 
-
+```
 select count(distinct summons_number) as No_of_Tickets_without_address from parking_violations_issued where Street_code1 = 0 or Street_code2 = 0 or Street_code3 = 0;
 
-
+```
 
 Part-II: Aggregation tasks
 
 1.) How often does each violation code occur? (frequency of violation codes - find the top 5)
 
+```
 select violation_code,count(1) as total_number_of_violations from parking_violations_issued_2017 group by violation_code order by total_number_of_violations desc limit 5;
-
+```
 
 2.) How often does each vehicle body type get a parking ticket? How about the vehicle make? (find the top 5 for both)
 
+```
 select vehicle_body_type,count(1) as total_number_of_violations from parking_violations_issued_2017 group by vehicle_body_type order by total_number_of_violations desc limit 5;
 
 select vehicle_make,count(1) as total_number_of_violations from parking_violations_issued_2017 group by vehicle_make order by total_number_of_violations desc limit 5;
 
+```
 3.) A precinct is a police station that has a certain zone of the city under its command. Find the (5 highest) frequencies of: 
 
 a.) Violating Precincts (this is the precinct of the zone where the violation occurred)
@@ -412,9 +419,9 @@ select violation_code,violation_time_bin,total_violations from most_commont_time
 
 a.) First, divide the year into some number of seasons, and find frequencies of tickets for each season. (Hint: A quick Google search reveals the following seasons in NYC: Spring(March, April, March); Summer(June, July, August); Fall(September, October, November); Winter(December, January, February))
 
-
+```
 select season,count(1) from parking_violations_issued_bucket_table group by season;
-
+```
 
  b.)Then, find the 3 most common violations for each of these seasons.
 
