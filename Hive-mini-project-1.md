@@ -9,12 +9,14 @@ Note: both files are csv files.
 placing the files in hdfs location 
 
 hdfs dfs -put /config/workspace/AgentLogingReport.csv /data/
+
 hdfs dfs -put /config/workspace/AgentPerformance.csv /data/
 
 
 1. Create a schema based on the given dataset
 
 --AgentLogingReport backup table
+
 create table if not exists agent_loging_report_bkp
 (sl_no int,agent_name string,ag_date string,login_time string,logout_time string,duration string)row format delimited fields terminated by ','tblproperties("skip.header.line.count"="1");
 
@@ -129,6 +131,7 @@ insert overwrite local directory '/config/workspace/right_join' select * from ag
 
 
 set hive.exec.dynamic.partition =true;
+
 set hive.exec.dynamic.partition.mode =nonstrict;
 
 
