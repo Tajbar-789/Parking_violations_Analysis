@@ -18,51 +18,96 @@ hdfs dfs -put /config/workspace/Parking_Violations_Issued_-_Fiscal_Year_2017.csv
 create table parking_violations_issued
 (
       Summons_Number bigint,
+   
       Plate_ID string,
+      
       Registration_State string,
+      
       Plate_Type string,
+      
       Issue_Date string,
+      
       Violation_Code int,
+      
       Vehicle_Body_Type string,
+      
       Vehicle_Make string,
+      
       Issuing_Agency string,
+      
       Street_Code1 int,
+      
       Street_Code2 int,
+      
       Street_Code3 int,
+      
       Vehicle_Expiration Date,
+      
       Violation_Location int,
+      
       Violation_Precinct int,
+      
       Issuer_Precinct int,
+      
       Issuer_Code int,
+      
       Issuer_Command string,
+      
       Issuer_Squad string,
+      
       Violation_Time string,
+      
       Time_First_Observed string,
+      
       Violation_County string,
+      
       Violation_In_Front_Of_Or_Opposite string,
+      
       House_Number string,
+      
       Street_Name string,
+      
       Intersecting_Street string,
+      
       Date_First_Observed int,
+      
       Law_Section int,
+      
       Sub_Division string,
+      
       Violation_Legal_Code string,
+      
       Days_Parking_In_Effect string,
+      
       From_Hours_In_Effect string,
+      
       To_Hours_In_Effect string,
+      
       Vehicle_Color string,
+      
       Unregistered_Vehicle int,
+      
       Vehicle_Year string,
+      
       Meter_Number string,
+      
       Feet_From_Curb int,
+      
       Violation_Post_Code string,
+      
       Violation_Description string,
+      
       No_Standing_or_Stopping_Violation string,
+      
       Hydrant_Violation string,
+      
       Double_Parking_Violation string
 )
+
 row format delimited
+
 fields terminated by ','
+
 tblproperties ("skip.header.line.count" = "1");
 
 
@@ -71,6 +116,7 @@ loading into the table
 load data  inpath '/data/Parking_Violations_Issued_-_Fiscal_Year_2017.csv' into table parking_violations_issued;
 
 
+```
 create table parking_violations_issued_2017
 (
       Summons_Number bigint,
@@ -122,6 +168,7 @@ row format delimited
 fields terminated by ',';
 
 
+```
 
 set hive.exec.dynamic.partition=true;
 set hive.exec.dynamic.partition.mode=nonstrict; 
