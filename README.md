@@ -1,1 +1,1 @@
-
+The project focuses on analysing huge dataset of parking violations using hive and hadoop . Partitioning and bucketing along with other techniques are utilised to provide the required result of different queries .
